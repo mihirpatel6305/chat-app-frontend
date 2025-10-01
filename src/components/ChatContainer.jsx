@@ -169,8 +169,8 @@ function ChatContainer({ isTyping, selectedUser }) {
         const currentDate = formatDateString(msg.createdAt);
         const prevDate = formatDateString(messages[i - 1]?.createdAt);
 
-        const isFirstUnread =
-          msg.isUnread && !messages.slice(0, i).some((m) => m.isUnread);
+        // const isFirstUnread =
+        //   msg.isUnread && !messages.slice(0, i).some((m) => m.isUnread);
 
         return (
           <div key={i}>
@@ -180,7 +180,7 @@ function ChatContainer({ isTyping, selectedUser }) {
               </div>
             )}
 
-            {isFirstUnread && loggedInUserId != msg?.senderId && (
+            {/* {isFirstUnread && loggedInUserId != msg?.senderId && (
               <div className="flex items-center my-4">
                 <div className="flex-grow border-t border-green-300"></div>
                 <span className="mx-4 text-green-500 text-sm font-medium">
@@ -188,7 +188,7 @@ function ChatContainer({ isTyping, selectedUser }) {
                 </span>
                 <div className="flex-grow border-t border-green-300"></div>
               </div>
-            )}
+            )} */}
 
             <div
               className={`flex ${
