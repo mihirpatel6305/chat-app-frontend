@@ -1,21 +1,21 @@
 import api from "./axios";
 
-export const loginUser = async (email, password) => {
+export const login = async (email, password) => {
   try {
     const response = await api.post("/auth/login", { email, password });
     localStorage.setItem("token", response.data.token);
     return response.data;
   } catch (error) {
-    throw error.response?.data || error.message;
+    return error.response?.data || error.message;
   }
 };
 
-export const signinUser = async (name, email, password) => {
+export const signup = async (name, email, password) => {
   try {
-    const response = await api.post("/auth/signin", { name, email, password });
+    const response = await api.post("/auth/signup", { name, email, password });
     localStorage.setItem("token", response.data.token);
     return response.data;
   } catch (error) {
-    throw error.response?.data || error.message;
+    return error.response?.data;
   }
 };

@@ -62,13 +62,6 @@ function ChatInput({ input, setInput, selectedUser }) {
 
         if (res.statusText == "OK") {
           const newMessage = res.data.newMessage;
-          // dispatch(
-          //   addMessage({
-          //     receiverId: selectedUser._id,
-          //     message: newMessage,
-          //   })
-          // );
-
           dispatch(
             updateMessage({
               receiverId: selectedUser._id,

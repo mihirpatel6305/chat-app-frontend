@@ -1,30 +1,59 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signinUser } from "../api/auth";
+import { signup } from "../api/auth";
+import { useDispatch } from "react-redux";
+import { setUser } from "../feature/userSlice";
 
 function SignUp() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFieldErrors({ ...fieldErrors, [e.target.name]: "" });
+    setGlobalError("");
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setError("");
+    setFieldErrors({});
+    setGlobalError("");
     setLoading(true);
 
     try {
-      await signinUser(name, email, password);
-      navigate("/");
-    } catch (err) {
-      if (err?.message) {
-        setError(err?.message);
+      const result = await signup(
+        formData.name,
+        formData.email,
+        formData.password
+      );
+
+      if (!result.success) {
+        const errorsObj = {};
+        if (result.errors && result.errors.length > 0) {
+          result.errors.forEach((err) => {
+            errorsObj[err.field] = err.message;
+          });
+        }
+        setFieldErrors(errorsObj);
+
+        setGlobalError(result.message);
       } else {
-        setError("Something went wrong. Please try again.");
+        localStorage.setItem("token", result.data.token);
+        dispatch(setUser(result.data.user));
+        navigate("/");
       }
-      console.error("error>>", err);
+    } catch (err) {
+      console.error(err);
+      setGlobalError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -35,9 +64,9 @@ function SignUp() {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
 
-        {error && (
+        {globalError && (
           <div className="mb-4 p-2 text-red-700 bg-red-100 rounded">
-            {error}
+            {globalError}
           </div>
         )}
 
@@ -46,36 +75,48 @@ function SignUp() {
             <label className="block mb-1 font-medium">Name</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your name"
               required
             />
+            {fieldErrors.name && (
+              <small className="text-red-500">{fieldErrors.name}</small>
+            )}
           </div>
 
           <div>
             <label className="block mb-1 font-medium">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
               required
             />
+            {fieldErrors.email && (
+              <small className="text-red-500">{fieldErrors.email}</small>
+            )}
           </div>
 
           <div>
             <label className="block mb-1 font-medium">Password</label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your password"
               required
             />
+            {fieldErrors.password && (
+              <small className="text-red-500">{fieldErrors.password}</small>
+            )}
           </div>
 
           <button

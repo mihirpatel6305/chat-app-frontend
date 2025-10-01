@@ -1,36 +1,49 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../api/auth";
+import { login } from "../api/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../feature/userSlice";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFieldErrors({ ...fieldErrors, [e.target.name]: "" });
+    setGlobalError("");
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setFieldErrors({});
+    setGlobalError("");
     setLoading(true);
 
     try {
-      const data = await loginUser(email, password);
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-      }
-      dispatch(setUser(data?.user));
-      navigate("/");
-    } catch (err) {
-      if (err?.message) {
-        setError(err?.message);
+      const res = await login(formData.email, formData.password);
+
+      if (!res.success) {
+        const errorsObj = {};
+        if (res.errors && res.errors.length > 0) {
+          res.errors.forEach((err) => {
+            errorsObj[err.field] = err.message;
+          });
+        }
+        setFieldErrors(errorsObj);
+        setGlobalError(res.message);
       } else {
-        setError("Unexpacted Error");
+        localStorage.setItem("token", res.data.token);
+        dispatch(setUser(res.data.user));
+        navigate("/");
       }
+    } catch (err) {
       console.error("login error>>", err);
+      setGlobalError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -41,9 +54,9 @@ function Login() {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
-        {error && (
+        {globalError && (
           <div className="mb-4 p-2 text-red-700 bg-red-100 rounded">
-            {error}
+            {globalError}
           </div>
         )}
 
@@ -52,24 +65,34 @@ function Login() {
             <label className="block mb-1 font-medium">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
               required
             />
+            {fieldErrors.email && (
+              <small className="text-red-500">{fieldErrors.email}</small>
+            )}
           </div>
+
           <div>
             <label className="block mb-1 font-medium">Password</label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your password"
               required
             />
+            {fieldErrors.password && (
+              <small className="text-red-500">{fieldErrors.password}</small>
+            )}
           </div>
+
           <button
             type="submit"
             disabled={loading}
