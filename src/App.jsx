@@ -10,8 +10,8 @@ function App() {
     const token = localStorage.getItem("token");
     if (token) {
       getProfile(token)
-        .then((user) => {
-          dispatch(setUser(user));
+        .then((res) => {
+          dispatch(setUser(res?.data?.user));
         })
         .catch(() => {
           dispatch(clearUser());

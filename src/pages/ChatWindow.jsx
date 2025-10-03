@@ -43,7 +43,7 @@ function ChatWindow() {
     if (!selectedUser && id) {
       fetchSelectedUser(id);
     }
-  }, [id, selectedUser?.id]);
+  }, [id, selectedUser?._id]);
 
   useEffect(() => {
     if (!socket || !loggedInUserId || !selectedUser?._id) return;

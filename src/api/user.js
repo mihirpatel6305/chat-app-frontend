@@ -21,7 +21,7 @@ export const getProfile = async () => {
 export const getUserById = async (id) => {
   try {
     const res = await api.get(`/user/${id}`);
-    return res.data;
+    return res.data?.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
