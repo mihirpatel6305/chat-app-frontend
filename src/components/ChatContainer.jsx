@@ -10,8 +10,9 @@ import formatDateString from "../services/formatDateString";
 import formatTime from "../services/formatTime";
 import Loader from "./Loader";
 import ChatImageSkeleton from "./ChatImageSkeleton";
+import CircularProgressBar from "./CircularProgressBar";
 
-function ChatContainer({ isTyping, selectedUser }) {
+function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
   const [loadingPrev, setLoadingPrev] = useState(false);
   const [before, setBefore] = useState(() => new Date());
   const loggedInUser = useSelector((state) => state.user.currentUser);
@@ -208,7 +209,14 @@ function ChatContainer({ isTyping, selectedUser }) {
                   }`}
                 >
                   {msg?.skeleton ? (
-                    <ChatImageSkeleton />
+                    <div className="relative">
+                      <ChatImageSkeleton />
+                      <div className="absolute inset-0 flex justify-center items-center">
+                        <CircularProgressBar
+                          uploadImageProgress={uploadImageProgress}
+                        />
+                      </div>
+                    </div>
                   ) : msg?.image ? (
                     <img
                       src={msg.image}
@@ -216,7 +224,12 @@ function ChatContainer({ isTyping, selectedUser }) {
                       className="max-w-[200px] max-h-[300px] rounded-lg"
                     />
                   ) : (
-                    <span className="break-words">{msg.text}</span>
+                    <span
+                      className="break-words"
+                      style={{ whiteSpace: "pre-wrap" }}
+                    >
+                      {msg.text.replace(/\n+$/g, "")}
+                    </span>
                   )}
 
                   <span className="text-[10px] text-gray-500 whitespace-nowrap">

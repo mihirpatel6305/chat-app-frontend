@@ -1,10 +1,15 @@
 import { useRef, useState } from "react";
 import { useSocket } from "../context/SocketContext";
-import { addMessage, updateMessage } from "../feature/messageSlice";
+import {
+  addMessage,
+  removeMessage,
+  updateMessage,
+} from "../feature/messageSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { sendImageMessage } from "../api/messages";
+import { toast } from "react-toastify";
 
-function ChatInput({ input, setInput, selectedUser }) {
+function ChatInput({ input, setInput, selectedUser, setUploadImageProgress }) {
   const socket = useSocket();
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSending, setIsSending] = useState(false);
@@ -58,7 +63,16 @@ function ChatInput({ input, setInput, selectedUser }) {
             },
           })
         );
-        const res = await sendImageMessage(selectedUser._id, selectedFile);
+        const res = await sendImageMessage(
+          selectedUser._id,
+          selectedFile,
+          (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadImageProgress(percentCompleted);
+          }
+        );
 
         if (res?.data?.success) {
           const newMessage = res.data?.data?.newMessage;
@@ -69,12 +83,16 @@ function ChatInput({ input, setInput, selectedUser }) {
               updates: { ...newMessage, skeleton: false },
             })
           );
+          setUploadImageProgress(0);
+        } else {
+          dispatch(removeMessage({ receiverId: selectedUser._id, tempId }));
+          toast.error(`Error: ${res.message}`);
         }
 
         setSelectedFile(null);
       } catch (error) {
-        console.log("Error in Sending Image>>", error);
-        alert("Imgae sending is failed");
+        console.error("Error in Sending Image>>", error);
+        toast.error("Failed to send image. Please try again.");
       } finally {
         setIsSending(false);
       }
@@ -83,6 +101,7 @@ function ChatInput({ input, setInput, selectedUser }) {
 
       if (!socket || !socket.connected) {
         console.log("Socket is not connected yet!");
+        toast.info("Connecting to server... Please wait.");
         return;
       }
 
@@ -124,13 +143,27 @@ function ChatInput({ input, setInput, selectedUser }) {
         </div>
       )}
       <div className="flex items-center gap-2 p-2 bg-gray-100 rounded-full shadow-inner">
-        <input
+        {/* <input
           type="text"
           value={input}
           onChange={handleInputChange}
           placeholder="Type a message..."
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           className="flex-grow bg-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm"
+        /> */}
+
+        <textarea
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Type a message..."
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); // prevent newline
+              handleSend();
+            }
+          }}
+          style={{ scrollbarWidth: "none" }}
+          className="flex-grow bg-white px-4 py-1 rounded-4xl focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm resize-none"
         />
 
         <input
@@ -146,22 +179,17 @@ function ChatInput({ input, setInput, selectedUser }) {
 
         <button
           onClick={() => fileInputRef.current.click()}
-          className="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
-          title="Attach Image"
+          className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 bg-green-500 rounded-full hover:bg-green-600 transition-colors"
+          title="Select Image"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+            className="w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white"
+            fill="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
-            />
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path d="M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2v9zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4h-3z" />
           </svg>
         </button>
 

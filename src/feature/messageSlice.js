@@ -25,6 +25,17 @@ const messagesSlice = createSlice({
         message[index] = { ...message[index], ...updates };
       }
     },
+    removeMessage: (state, action) => {
+      const { receiverId, tempId } = action.payload;
+      const messages = state.messages[receiverId];
+
+      if (!messages) return;
+
+      const index = messages.findIndex((msg) => msg.tempId === tempId);
+      if (index !== -1) {
+        messages.splice(index, 1);
+      }
+    },
     setMessages: (state, action) => {
       const { receiverId, messages } = action.payload;
 
@@ -51,6 +62,11 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { addMessage, setMessages, addPrevMessage, updateMessage } =
-  messagesSlice.actions;
+export const {
+  addMessage,
+  setMessages,
+  addPrevMessage,
+  updateMessage,
+  removeMessage,
+} = messagesSlice.actions;
 export default messagesSlice.reducer;

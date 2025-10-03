@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../feature/userSlice";
+import { toast } from "react-toastify";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -37,6 +38,7 @@ function Login() {
         setFieldErrors(errorsObj);
         setGlobalError(res.message);
       } else {
+        toast.success("Login successful. Welcome back.");
         localStorage.setItem("token", res.data.token);
         dispatch(setUser(res.data.user));
         navigate("/");

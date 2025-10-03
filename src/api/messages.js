@@ -9,7 +9,7 @@ export const getUnreadCount = async (userId) => {
   }
 };
 
-export const sendImageMessage = async (receiverId, file) => {
+export const sendImageMessage = async (receiverId, file, onUploadProgress) => {
   try {
     const formData = new FormData();
     formData.append("image", file);
@@ -17,9 +17,10 @@ export const sendImageMessage = async (receiverId, file) => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      onUploadProgress,
     });
     return res;
   } catch (error) {
-    throw error.response?.data || error.message;
+    return error.response?.data || error.message;
   }
 };

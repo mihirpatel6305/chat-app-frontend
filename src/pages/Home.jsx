@@ -9,6 +9,7 @@ import { getUnreadCount } from "../api/messages";
 import addUnreadCount from "../services/addUnreadCount";
 import Loader from "../components/Loader";
 import LogoutModal from "../components/LogoutModal";
+import { toast } from "react-toastify";
 
 function Home() {
   const [unreadCounts, setUnreadCounts] = useState([]);
@@ -46,6 +47,7 @@ function Home() {
       socket.disconnect();
     }
     localStorage.removeItem("token");
+    toast.success("You have been logged out successfully");
     navigate("/login");
   };
 
@@ -90,7 +92,7 @@ function Home() {
         }
       } catch (error) {
         console.error("Error fetching users:", error);
-        alert("Error in fetching User List");
+        toast.error("Something wrong in refreshing User List");
       } finally {
         setIsLoading(false);
       }

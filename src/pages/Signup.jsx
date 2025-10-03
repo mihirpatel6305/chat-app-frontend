@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../api/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../feature/userSlice";
+import { toast } from "react-toastify";
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -49,6 +50,7 @@ function SignUp() {
       } else {
         localStorage.setItem("token", result.data.token);
         dispatch(setUser(result.data.user));
+        toast.success("Your account has been created successfully.");
         navigate("/");
       }
     } catch (err) {

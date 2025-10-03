@@ -10,6 +10,7 @@ import { getUserById } from "../api/user";
 function ChatWindow() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [uploadImageProgress, setUploadImageProgress] = useState(0);
   const socket = useSocket();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -93,13 +94,18 @@ function ChatWindow() {
           <span className="text-lg">{selectedUser?.name}</span>
         </div>
 
-        <ChatContainer isTyping={isTyping} selectedUser={selectedUser} />
+        <ChatContainer
+          isTyping={isTyping}
+          selectedUser={selectedUser}
+          uploadImageProgress={uploadImageProgress}
+        />
 
         <div className="flex p-4 gap-2 border-t">
           <ChatInput
             input={input}
             setInput={setInput}
             selectedUser={selectedUser}
+            setUploadImageProgress={setUploadImageProgress}
           />
         </div>
       </div>
