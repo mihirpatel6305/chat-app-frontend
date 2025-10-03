@@ -60,8 +60,8 @@ function ChatInput({ input, setInput, selectedUser }) {
         );
         const res = await sendImageMessage(selectedUser._id, selectedFile);
 
-        if (res.statusText == "OK") {
-          const newMessage = res.data.newMessage;
+        if (res?.data?.success) {
+          const newMessage = res.data?.data?.newMessage;
           dispatch(
             updateMessage({
               receiverId: selectedUser._id,
