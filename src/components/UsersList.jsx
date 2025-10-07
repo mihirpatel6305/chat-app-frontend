@@ -27,6 +27,7 @@ function UsersList({ users }) {
           return user;
         })
       );
+      socket.emit("message_delivered", message);
     };
 
     socket.on("message", handleIncomingMessage);

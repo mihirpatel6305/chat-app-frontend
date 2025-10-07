@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../context/SocketContext";
 import { setAllUser, setOnlineUser } from "../feature/userSlice";
-import { getUnreadCount } from "../api/messages";
+import { getUnreadCount, setAllDelivered } from "../api/messages";
 import addUnreadCount from "../services/addUnreadCount";
 import Loader from "../components/Loader";
 import LogoutModal from "../components/LogoutModal";
@@ -57,6 +57,10 @@ function Home() {
     async function fetchUnreadCounts() {
       try {
         if (loggedInUserId) {
+          // make all the message delivered and emit message_delivered event in backend
+          await setAllDelivered();
+
+          // fetching unread count
           const counts = await getUnreadCount(loggedInUserId);
           setUnreadCounts(counts || []);
         }
@@ -64,7 +68,6 @@ function Home() {
         console.error("Error fetching Unread counts>>", error);
       }
     }
-
     fetchUnreadCounts();
   }, [loggedInUserId]);
 

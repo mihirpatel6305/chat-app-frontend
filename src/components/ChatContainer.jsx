@@ -150,6 +150,7 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
           message: newImageMessage,
         })
       );
+      socket.emit("message_seen", newImageMessage);
     };
 
     socket.on("imageMessage", handleImageMessage);

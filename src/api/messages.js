@@ -24,3 +24,13 @@ export const sendImageMessage = async (receiverId, file, onUploadProgress) => {
     return error.response?.data || error.message;
   }
 };
+
+export const setAllDelivered = async () => {
+  try {
+    const res = await api.put("/message/delivered");
+    return res.data?.data || res.data;
+  } catch (error) {
+    console.error("Error in setAllDelivered >>", error);
+    throw error.response?.data || error.message;
+  }
+};
