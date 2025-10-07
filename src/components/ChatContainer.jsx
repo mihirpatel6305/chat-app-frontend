@@ -21,7 +21,7 @@ import singleTick from "../assets/singleTick.svg";
 import doubleTick from "../assets/doubleTick.svg";
 import blueTick from "../assets/blueTick.svg";
 import pending from "../assets/pending.svg";
-import ShowImageModal from "./showImageModal";
+import ShowImageModal from "./ShowImageModal";
 
 function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
   const [loadingPrev, setLoadingPrev] = useState(false);
