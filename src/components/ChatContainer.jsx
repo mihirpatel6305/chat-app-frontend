@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   addMessage,
   addPrevMessage,
-  allMsgStatusSeen,
   setMessages,
   updateMsgStatusDelivered,
   updateMsgStatusSeen,
@@ -183,10 +182,6 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
 
     socket.on("message_seen", (message) => {
       dispatch(updateMsgStatusSeen(message));
-    });
-
-    socket.on("mark_as_read", ({ seenby }) => {
-      dispatch(allMsgStatusSeen(seenby));
     });
   }, [socket]);
 

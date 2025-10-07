@@ -64,6 +64,7 @@ function Home() {
         console.error("Error fetching Unread counts>>", error);
       }
     }
+
     fetchUnreadCounts();
   }, [loggedInUserId]);
 
@@ -74,7 +75,9 @@ function Home() {
     });
 
     socket.on("message", (message) => {
-      socket.emit("message_delivered", message);
+      if (message?.status !== "seen") {
+        socket.emit("message_delivered", message);
+      }
     });
   }, [socket]);
 

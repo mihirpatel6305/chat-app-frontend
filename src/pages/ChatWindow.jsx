@@ -6,6 +6,7 @@ import ChatInput from "../components/ChatInput";
 import ChatContainer from "../components/ChatContainer";
 import { setSelectedUser } from "../feature/userSlice";
 import { getUserById } from "../api/user";
+import { allMsgStatusSeen } from "../feature/messageSlice";
 
 function ChatWindow() {
   const [input, setInput] = useState("");
@@ -62,6 +63,10 @@ function ChatWindow() {
     socket.emit("mark_as_read", {
       userId: loggedInUserId,
       chatWithId: selectedUser._id,
+    });
+
+    socket.on("mark_as_read", ({ seenby }) => {
+      dispatch(allMsgStatusSeen(seenby));
     });
   }, [socket, loggedInUserId, selectedUser?._id]);
 
