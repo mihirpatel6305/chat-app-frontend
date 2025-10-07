@@ -10,9 +10,14 @@ export const login = async (email, password) => {
   }
 };
 
-export const signup = async (name, email, password) => {
+export const signup = async (name, email, password, confirmPassword) => {
   try {
-    const response = await api.post("/auth/signup", { name, email, password });
+    const response = await api.post("/auth/signup", {
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
     localStorage.setItem("token", response.data.token);
     return response.data;
   } catch (error) {

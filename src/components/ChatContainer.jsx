@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   addMessage,
   addPrevMessage,
+  allMsgStatusSeen,
   setMessages,
+  updateMsgStatusDelivered,
+  updateMsgStatusSeen,
+  updateMsgStatusSent,
 } from "../feature/messageSlice";
 import formatDateString from "../services/formatDateString";
 import formatTime from "../services/formatTime";
@@ -13,10 +17,16 @@ import ChatImageSkeleton from "./ChatImageSkeleton";
 import CircularProgressBar from "./CircularProgressBar";
 import doodle from "../assets/doodle.jpg";
 import chat from "../assets/chat.svg";
+import singleTick from "../assets/singleTick.svg";
+import doubleTick from "../assets/doubleTick.svg";
+import blueTick from "../assets/blueTick.svg";
+import pending from "../assets/pending.svg";
+import ShowImageModal from "./showImageModal";
 
 function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
   const [loadingPrev, setLoadingPrev] = useState(false);
   const [before, setBefore] = useState(() => new Date());
+  const [showImage, setShowImage] = useState({ isOpen: false, image: "" });
   const loggedInUser = useSelector((state) => state.user.currentUser);
   const loggedInUserId = loggedInUser?._id;
   const socket = useSocket();
@@ -39,6 +49,7 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
           message,
         })
       );
+      socket.emit("message_seen", message);
     };
 
     socket.on("message", handleMessage);
@@ -155,6 +166,30 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
     socket.emit("user_connected", loggedInUserId);
   }, [loggedInUserId]);
 
+  // For handling message status
+  useEffect(() => {
+    socket.on("message_sent", (serverMessage) => {
+      dispatch(
+        updateMsgStatusSent({
+          tempId: serverMessage?.tempId,
+          newMessage: serverMessage?._doc,
+        })
+      );
+    });
+
+    socket.on("message_delivered", (message) => {
+      dispatch(updateMsgStatusDelivered(message));
+    });
+
+    socket.on("message_seen", (message) => {
+      dispatch(updateMsgStatusSeen(message));
+    });
+
+    socket.on("mark_as_read", ({ seenby }) => {
+      dispatch(allMsgStatusSeen(seenby));
+    });
+  }, [socket]);
+
   return (
     <div
       ref={chatContainerRef}
@@ -203,9 +238,6 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
             const prevDate = formatDateString(messages[i - 1]?.createdAt);
             const showDate = i === 0 || currentDate !== prevDate;
 
-            // const isFirstUnread =
-            //   msg.isUnread && !messages.slice(0, i).some((m) => m.isUnread);
-
             return (
               <div key={i}>
                 {showDate && (
@@ -213,17 +245,6 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                     {currentDate}
                   </div>
                 )}
-
-                {/* {isFirstUnread && loggedInUserId != msg?.senderId && (
-              <div className="flex items-center my-4">
-                <div className="flex-grow border-t border-green-300"></div>
-                <span className="mx-4 text-green-500 text-sm font-medium">
-                  New messages
-                </span>
-                <div className="flex-grow border-t border-green-300"></div>
-              </div>
-            )} */}
-
                 <div
                   className={`flex ${
                     isSender ? "justify-end" : "justify-start"
@@ -237,7 +258,7 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                     }`}
                   >
                     <div
-                      className={`flex items-end gap-2 ${
+                      className={`flex items-end gap-2   ${
                         msg?.image || msg?.skeleton ? "flex-col" : ""
                       }`}
                     >
@@ -255,6 +276,13 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                           src={msg.image}
                           alt="chat image"
                           className="max-w-[200px] max-h-[300px] rounded-lg"
+                          onClick={() => {
+                            setShowImage((prev) => ({
+                              ...prev,
+                              isOpen: true,
+                              image: msg?.image,
+                            }));
+                          }}
                         />
                       ) : (
                         <span
@@ -265,11 +293,43 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                         </span>
                       )}
 
-                      <span className="text-[10px] text-gray-500 whitespace-nowrap">
-                        {msg?.createdAt
-                          ? formatTime(msg?.createdAt)
-                          : formatTime(new Date())}
-                      </span>
+                      <div className="flex items-center gap-1 mt-1 justify-end">
+                        <span className="text-[10px] text-gray-500 whitespace-nowrap leading-none">
+                          {msg?.createdAt
+                            ? formatTime(msg?.createdAt)
+                            : formatTime(new Date())}
+                        </span>
+
+                        {isSender && (
+                          <span className="w-3 h-3 flex items-center justify-center">
+                            {msg?.status === "sent" ? (
+                              <img
+                                src={singleTick}
+                                alt="sent"
+                                className="w-3 h-3"
+                              />
+                            ) : msg?.status === "delivered" ? (
+                              <img
+                                src={doubleTick}
+                                alt="delivered"
+                                className="w-3 h-3"
+                              />
+                            ) : msg?.status === "seen" ? (
+                              <img
+                                src={blueTick}
+                                alt="seen"
+                                className="w-3 h-3"
+                              />
+                            ) : (
+                              <img
+                                src={pending}
+                                alt="pending"
+                                className="w-3 h-3"
+                              />
+                            )}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -293,6 +353,12 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
           )}
           <div ref={messagesEndRef} />
         </div>
+      )}
+      {showImage.isOpen && (
+        <ShowImageModal
+          showImage={showImage}
+          onClose={() => setShowImage({ isOpen: false, image: "" })}
+        />
       )}
     </div>
   );

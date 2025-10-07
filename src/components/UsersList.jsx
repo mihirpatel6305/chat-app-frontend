@@ -71,7 +71,7 @@ function UsersList({ users }) {
   }
 
   return (
-    <div className="overflow-y-auto max-h-[500px]">
+    <div className="overflow-y-auto" style={{ scrollbarWidth: "none" }}>
       <ul>
         {userList.map((user) => (
           <li

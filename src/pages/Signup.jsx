@@ -10,6 +10,7 @@ function SignUp() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
@@ -34,7 +35,8 @@ function SignUp() {
       const result = await signup(
         formData.name,
         formData.email,
-        formData.password
+        formData.password,
+        formData.confirmPassword
       );
 
       if (!result.success) {
@@ -62,8 +64,8 @@ function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-3 bg-gray-100">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
 
         {globalError && (
@@ -82,7 +84,7 @@ function SignUp() {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your name"
-              required
+              // required
             />
             {fieldErrors.name && (
               <small className="text-red-500">{fieldErrors.name}</small>
@@ -98,7 +100,7 @@ function SignUp() {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
-              required
+              // required
             />
             {fieldErrors.email && (
               <small className="text-red-500">{fieldErrors.email}</small>
@@ -113,11 +115,29 @@ function SignUp() {
               value={formData.password}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
-              required
+              placeholder="Enter password"
+              // required
             />
             {fieldErrors.password && (
               <small className="text-red-500">{fieldErrors.password}</small>
+            )}
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Confirm password"
+              // required
+            />
+            {fieldErrors?.confirmPassword && (
+              <small className="text-red-500">
+                {fieldErrors.confirmPassword}
+              </small>
             )}
           </div>
 

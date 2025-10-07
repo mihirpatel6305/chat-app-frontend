@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { sendImageMessage } from "../api/messages";
 import { toast } from "react-toastify";
 import img from "../assets/imgSend.svg";
+import send from "../assets/send.svg";
 
 function ChatInput({ input, setInput, selectedUser, setUploadImageProgress }) {
   const socket = useSocket();
@@ -44,6 +45,40 @@ function ChatInput({ input, setInput, selectedUser, setUploadImageProgress }) {
       });
       isTypingRef.current = false;
     }, 1000);
+  }
+
+  function handleFileInputChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // image validation
+    const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+      toast.error("Only JPG, JPEG, PNG, and GIF files are allowed.");
+      e.target.value = "";
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      e.target.value = "";
+      return;
+    }
+
+    // size validation
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      toast.error("File size exceeds 5 MB. Please choose a smaller image.");
+      e.target.value = "";
+      return;
+    }
+
+    setSelectedFile(file);
+    setClosePreview(false);
   }
 
   // handling text and image send
@@ -106,11 +141,15 @@ function ChatInput({ input, setInput, selectedUser, setUploadImageProgress }) {
         return;
       }
 
+      const tempId = Date.now();
+
       const message = {
         senderId: loggedInUserId,
         receiverId: selectedUser._id,
-        text: input,
+        text: input.trim(),
         createdAt: Date.now(),
+        tempId,
+        status: "sending",
       };
 
       socket.emit("message", message);
@@ -144,16 +183,7 @@ function ChatInput({ input, setInput, selectedUser, setUploadImageProgress }) {
           </button>
         </div>
       )}
-      <div className="flex items-center gap-2 p-2 bg-gray-100 rounded-full shadow-inner">
-        {/* <input
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          placeholder="Type a message..."
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          className="flex-grow bg-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm"
-        /> */}
-
+      <div className="flex items-center gap-2 p-2 bg-gray-100 rounded-2xl shadow-inner">
         <textarea
           value={input}
           onChange={handleInputChange}
@@ -165,48 +195,40 @@ function ChatInput({ input, setInput, selectedUser, setUploadImageProgress }) {
             }
           }}
           style={{ scrollbarWidth: "none" }}
-          className="flex-grow bg-white px-4 py-1 rounded-4xl focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm resize-none"
+          className="flex-grow bg-white px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm resize-none"
         />
 
         <input
           type="file"
-          accept="image/*"
+          accept=".jpg,.jpeg,.png,.gif"
           ref={fileInputRef}
-          onChange={(e) => {
-            setSelectedFile(e.target.files[0]);
-            setClosePreview(false);
-          }}
+          onChange={handleFileInputChange}
           className="hidden"
         />
 
         <button
           onClick={() => fileInputRef.current.click()}
-          className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 bg-green-500 rounded-full hover:bg-green-600 transition-colors"
-          title="Select Image"
+          className="flex items-center justify-center cursor-pointer w-10 h-10 bg-gray-700 rounded-full hover:bg-gray-800 hover:scale-105 transition-transform shadow-sm"
+          title="Attach image"
         >
-          {/* <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white"
-            fill="currentColor"
-          >
-            <path d="M0 0h24v24H0V0z" fill="none" />
-            <path d="M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2v9zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4h-3z" />
-          </svg> */}
-
-          <img src={img} alt="img" className="w-6 h-6 invert" />
+          <img src={img} alt="upload" className="w-5 h-5 invert" />
         </button>
 
         <button
           onClick={handleSend}
           disabled={isSending}
-          className={`px-4 py-2 rounded-full text-white font-semibold transition-colors ${
+          className={`flex items-center justify-center cursor-pointer w-10 h-10 rounded-full transition-all ${
             isSending
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
+              : "bg-green-900 hover:bg-green-950"
           }`}
+          title="Send message"
         >
-          {isSending ? "Sending..." : "Send"}
+          {isSending ? (
+            <span className="text-sm text-white font-medium">...</span>
+          ) : (
+            <img src={send} alt="send" className="w-6 h-6" />
+          )}
         </button>
       </div>
     </div>

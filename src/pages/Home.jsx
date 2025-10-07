@@ -72,7 +72,11 @@ function Home() {
     socket.on("onlineUsers", (onlineUsers) => {
       dispatch(setOnlineUser(onlineUsers));
     });
-  }, []);
+
+    socket.on("message", (message) => {
+      socket.emit("message_delivered", message);
+    });
+  }, [socket]);
 
   // Connection response to backend
   useEffect(() => {
@@ -102,7 +106,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center p-4 min-h-screen bg-gray-100">
       <div
         className="w-full max-w-md bg-white rounded-lg shadow-lg flex flex-col h-[80vh]"
         style={{
@@ -133,7 +137,10 @@ function Home() {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
           {isLoading ? <Loader /> : <UsersList users={filteredUsers} />}
         </div>
       </div>

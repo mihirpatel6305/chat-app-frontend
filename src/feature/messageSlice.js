@@ -25,6 +25,74 @@ const messagesSlice = createSlice({
         message[index] = { ...message[index], ...updates };
       }
     },
+
+    // Updating the status and replace it with original message object
+    updateMsgStatusSent: (state, action) => {
+      const { tempId, newMessage } = action.payload;
+      const receiverId = newMessage?.receiverId;
+      const messages = state.messages[receiverId];
+
+      if (!messages) return;
+
+      const index = messages.findIndex((msg) => msg.tempId === tempId);
+      if (index !== -1) {
+        // Replace temp message with actual message from server
+        state.messages[receiverId][index] = {
+          ...newMessage,
+          status: "sent",
+        };
+      }
+    },
+
+    updateMsgStatusDelivered: (state, action) => {
+      const message = action.payload;
+      const receiverId = message?.receiverId;
+      const messages = state.messages[receiverId];
+
+      if (!messages) return;
+
+      const index = messages.findIndex((msg) => msg?._id === message?._id);
+      if (index !== -1) {
+        const currentStatus = messages[index]?.status;
+
+        // Allow delivered only if message isn't already seen
+        if (currentStatus !== "seen") {
+          state.messages[receiverId][index] = {
+            ...message,
+            status: "delivered",
+          };
+        }
+      }
+    },
+
+    updateMsgStatusSeen: (state, action) => {
+      const message = action.payload;
+      const receiverId = message?.receiverId;
+      const messages = state.messages[receiverId];
+
+      if (!messages) return;
+
+      const index = messages.findIndex((msg) => msg?._id === message?._id);
+      if (index !== -1) {
+        state.messages[receiverId][index] = {
+          ...message,
+          status: "seen",
+        };
+      }
+    },
+
+    allMsgStatusSeen: (state, action) => {
+      const receiverId = action.payload;
+      const messages = state.messages[receiverId];
+      if (!messages) return;
+      state.messages[receiverId] = messages.map((msg) => {
+        if (msg.status !== "seen") {
+          return { ...msg, status: "seen" };
+        }
+        return msg;
+      });
+    },
+
     removeMessage: (state, action) => {
       const { receiverId, tempId } = action.payload;
       const messages = state.messages[receiverId];
@@ -68,5 +136,9 @@ export const {
   addPrevMessage,
   updateMessage,
   removeMessage,
+  updateMsgStatusSent,
+  updateMsgStatusDelivered,
+  updateMsgStatusSeen,
+  allMsgStatusSeen,
 } = messagesSlice.actions;
 export default messagesSlice.reducer;

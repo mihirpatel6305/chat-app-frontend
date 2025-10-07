@@ -52,6 +52,12 @@ function ChatWindow() {
     // If user refresh this page then important to emit.
     socket.emit("user_connected", loggedInUserId);
 
+    //  Re-register active chat if user was viewing someone’s chat
+    socket.emit("active", {
+      senderId: loggedInUserId,
+      receiverId: selectedUser?._id,
+    });
+
     // handle mark as read messages.
     socket.emit("mark_as_read", {
       userId: loggedInUserId,
@@ -100,7 +106,7 @@ function ChatWindow() {
           uploadImageProgress={uploadImageProgress}
         />
 
-        <div className="flex p-4 gap-2 border-t">
+        <div className="flex p-2 gap-2 border-t">
           <ChatInput
             input={input}
             setInput={setInput}
