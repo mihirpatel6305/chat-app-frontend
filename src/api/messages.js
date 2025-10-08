@@ -1,4 +1,5 @@
 import api from "./axios";
+import { compressImage } from "../services/compressImage";
 
 export const getUnreadCount = async (userId) => {
   try {
@@ -11,8 +12,9 @@ export const getUnreadCount = async (userId) => {
 
 export const sendImageMessage = async (receiverId, file, onUploadProgress) => {
   try {
+    const compressedImage = await compressImage(file, 0.8, 1024, 1024);
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", compressedImage, file.name);
     const res = await api.post(`message/image/${receiverId}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",

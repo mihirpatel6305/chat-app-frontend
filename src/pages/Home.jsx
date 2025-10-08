@@ -117,10 +117,10 @@ function Home() {
         className="w-full max-w-md bg-white rounded-lg shadow-lg flex flex-col h-[80vh]"
         style={{
           scrollbarWidth: "none",
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.90)), url(${doodle})`,
-          backgroundSize: "150px 150px",
-          backgroundRepeat: "repeat",
-          backgroundPosition: "top left",
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${doodle})`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
         }}
       >
         <div className="flex justify-between items-center p-5 bg-green-900 text-white rounded-t-lg">

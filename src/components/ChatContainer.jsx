@@ -247,7 +247,7 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                   } mb-2`}
                 >
                   <div
-                    className={`max-w-[70%] px-3 py-2 rounded-lg text-sm leading-snug ${
+                    className={`max-w-[70%] px-2 py-2 rounded-lg text-sm leading-snug ${
                       isSender
                         ? "bg-green-200 text-gray-900 rounded-bl-lg rounded-tr-none"
                         : "bg-gray-200 text-gray-900 rounded-br-lg rounded-tl-none"
@@ -268,21 +268,30 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                           </div>
                         </div>
                       ) : msg?.image ? (
-                        <img
-                          src={msg.image}
-                          alt="chat image"
-                          className="max-w-[200px] max-h-[300px] rounded-lg"
-                          onClick={() => {
-                            setShowImage((prev) => ({
-                              ...prev,
-                              isOpen: true,
-                              image: msg?.image,
-                            }));
-                          }}
-                        />
+                        <div className="w-full max-w-[200px] max-h-[300px] rounded-lg overflow-hidden cursor-pointer">
+                          <img
+                            src={msg.image}
+                            alt="chat image"
+                            className="w-full h-full object-cover"
+                            onClick={() => {
+                              setShowImage((prev) => ({
+                                ...prev,
+                                isOpen: true,
+                                image: msg?.image,
+                              }));
+                            }}
+                            onLoad={() => {
+                              if (i === messages.length - 1) {
+                                messagesEndRef.current?.scrollIntoView({
+                                  behavior: "smooth",
+                                });
+                              }
+                            }}
+                          />
+                        </div>
                       ) : (
                         <span
-                          className="break-words"
+                          className="break-words pb-1"
                           style={{ whiteSpace: "pre-wrap" }}
                         >
                           {msg.text.replace(/\n+$/g, "")}
