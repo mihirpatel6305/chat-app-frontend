@@ -17,7 +17,9 @@ import CircularProgressBar from "./CircularProgressBar";
 import doodle from "../assets/doodle.jpg";
 import chat from "../assets/chat.svg";
 import singleTick from "../assets/singleTick.svg";
+import singleTickWhite from "../assets/singleTickWhite.svg";
 import doubleTick from "../assets/doubleTick.svg";
+import doubleTickWhite from "../assets/doubleTickWhite.svg";
 import blueTick from "../assets/blueTick.svg";
 import pending from "../assets/pending.svg";
 import ShowImageModal from "./ShowImageModal";
@@ -247,14 +249,14 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                   } mb-2`}
                 >
                   <div
-                    className={`max-w-[70%] px-2 py-2 rounded-lg text-sm leading-snug ${
+                    className={`max-w-[70%] px-2 py-2 rounded-xl text-sm leading-snug ${
                       isSender
                         ? "bg-green-200 text-gray-900 rounded-bl-lg rounded-tr-none"
                         : "bg-gray-200 text-gray-900 rounded-br-lg rounded-tl-none"
                     }`}
                   >
                     <div
-                      className={`flex items-end gap-2   ${
+                      className={`flex items-end gap-2 ${
                         msg?.image || msg?.skeleton ? "flex-col" : ""
                       }`}
                     >
@@ -268,7 +270,7 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                           </div>
                         </div>
                       ) : msg?.image ? (
-                        <div className="w-full max-w-[200px] max-h-[300px] rounded-lg overflow-hidden cursor-pointer">
+                        <div className="relative w-full max-w-[200px] max-h-[300px] rounded-lg overflow-hidden cursor-pointer">
                           <img
                             src={msg.image}
                             alt="chat image"
@@ -288,53 +290,76 @@ function ChatContainer({ isTyping, selectedUser, uploadImageProgress }) {
                               }
                             }}
                           />
-                        </div>
-                      ) : (
-                        <span
-                          className="break-words pb-1"
-                          style={{ whiteSpace: "pre-wrap" }}
-                        >
-                          {msg.text.replace(/\n+$/g, "")}
-                        </span>
-                      )}
-
-                      <div className="flex items-center gap-1 mt-1 justify-end">
-                        <span className="text-[10px] text-gray-500 whitespace-nowrap leading-none">
-                          {msg?.createdAt
-                            ? formatTime(msg?.createdAt)
-                            : formatTime(new Date())}
-                        </span>
-
-                        {isSender && (
-                          <span className="w-3 h-3 flex items-center justify-center">
-                            {msg?.status === "sent" ? (
+                          {/* Status for image */}
+                          <div className="absolute bottom-1 right-1 flex items-center gap-1">
+                            <span className="text-[10px] text-white whitespace-nowrap leading-none">
+                              {msg?.createdAt
+                                ? formatTime(msg?.createdAt)
+                                : formatTime(new Date())}
+                            </span>
+                            {isSender && (
                               <img
-                                src={singleTick}
-                                alt="sent"
-                                className="w-3 h-3"
-                              />
-                            ) : msg?.status === "delivered" ? (
-                              <img
-                                src={doubleTick}
-                                alt="delivered"
-                                className="w-3 h-3"
-                              />
-                            ) : msg?.status === "seen" ? (
-                              <img
-                                src={blueTick}
-                                alt="seen"
-                                className="w-3 h-3"
-                              />
-                            ) : (
-                              <img
-                                src={pending}
-                                alt="pending"
+                                src={
+                                  msg?.status === "sent"
+                                    ? singleTickWhite
+                                    : msg?.status === "delivered"
+                                    ? doubleTickWhite
+                                    : msg?.status === "seen"
+                                    ? blueTick
+                                    : pending
+                                }
+                                alt={msg?.status}
                                 className="w-3 h-3"
                               />
                             )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className={`relative max-w-[300px] ${
+                            msg.text.length < 20
+                              ? "inline-flex items-end gap-1"
+                              : ""
+                          }`}
+                        >
+                          <span
+                            className={`break-words ${
+                              msg.text.length < 20 ? "pr-1" : "block w-full"
+                            }`}
+                            style={{ whiteSpace: "pre-wrap" }}
+                          >
+                            {msg.text.replace(/\n+$/g, "")}
                           </span>
-                        )}
-                      </div>
+
+                          {/* Status for text */}
+                          <div
+                            className={`flex items-center gap-1 text-[10px] text-gray-500 ${
+                              msg.text.length < 20 ? "" : "mt-1 justify-end"
+                            }`}
+                          >
+                            <span>
+                              {msg?.createdAt
+                                ? formatTime(msg?.createdAt)
+                                : formatTime(new Date())}
+                            </span>
+                            {isSender && (
+                              <img
+                                src={
+                                  msg?.status === "sent"
+                                    ? singleTick
+                                    : msg?.status === "delivered"
+                                    ? doubleTick
+                                    : msg?.status === "seen"
+                                    ? blueTick
+                                    : pending
+                                }
+                                alt={msg?.status}
+                                className="w-3 h-3"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
