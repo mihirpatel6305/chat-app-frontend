@@ -4,8 +4,16 @@ import UsersList from "../components/UsersList";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../context/SocketContext";
-import { setAllUser, setOnlineUser } from "../feature/userSlice";
-import { getUnreadCount, setAllDelivered } from "../api/messages";
+import {
+  setAllUser,
+  setOnlineUser,
+  sortUserOnLastestMsg,
+} from "../feature/userSlice";
+import {
+  fetchLatestMsgTime,
+  getUnreadCount,
+  setAllDelivered,
+} from "../api/messages";
 import addUnreadCount from "../services/addUnreadCount";
 import Loader from "../components/Loader";
 import LogoutModal from "../components/LogoutModal";
@@ -52,7 +60,7 @@ function Home() {
     navigate("/login");
   };
 
-  //fetching Unread Count data here
+  // fetching Unread Count data here
   useEffect(() => {
     async function fetchUnreadCounts() {
       try {
@@ -70,6 +78,26 @@ function Home() {
     }
     fetchUnreadCounts();
   }, [loggedInUserId]);
+
+  // fetch latest message time and push in redux store to sort User
+  useEffect(() => {
+    const fetchAndSortUserOnLatestMsg = async () => {
+      try {
+        const recentMsgData = await fetchLatestMsgTime();
+        const latestMessages = recentMsgData?.data?.latestMessages || [];
+
+        if (latestMessages.length > 0) {
+          dispatch(sortUserOnLastestMsg(latestMessages));
+        }
+      } catch (error) {
+        console.error("Error fetching latest messages:", error);
+      }
+    };
+
+    if (users.length > 0) {
+      fetchAndSortUserOnLatestMsg();
+    }
+  }, [dispatch, users]);
 
   // Set online user in redux from backend
   useEffect(() => {

@@ -10,6 +10,15 @@ export const getUnreadCount = async (userId) => {
   }
 };
 
+export const fetchLatestMsgTime = async () => {
+  try {
+    const res = await api.get("message/latest");
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 export const sendImageMessage = async (receiverId, file, onUploadProgress) => {
   try {
     const compressedImage = await compressImage(file, 0.8, 1024, 1024);
